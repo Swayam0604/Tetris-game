@@ -1,0 +1,75 @@
+.App {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+}
+
+/* Global layout styles */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Utility classes */
+.text-shadow {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.box-shadow-neon {
+  box-shadow: 
+    0 0 10px rgba(6, 182, 212, 0.3),
+    0 0 20px rgba(6, 182, 212, 0.2),
+    0 0 30px rgba(6, 182, 212, 0.1);
+}
+
+/* Game-specific animations */
+.piece-drop {
+  animation: dropPiece 0.3s ease-in-out;
+}
+
+@keyframes dropPiece {
+  0% {
+    transform: translateY(-10px);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.line-clear {
+  animation: lineClear 0.5s ease-in-out;
+}
+
+@keyframes lineClear {
+  0%, 100% {
+    opacity: 1;
+    background-color: inherit;
+  }
+  50% {
+    opacity: 0.5;
+    background-color: #ffffff;
+  }
+}
+
+/* Responsive design helpers */
+@media (max-width: 1024px) {
+  .lg\:flex-row {
+    flex-direction: column !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+  
+  .text-4xl {
+    font-size: 2rem !important;
+  }
+  
+  .text-3xl {
+    font-size: 1.5rem !important;
+  }
+}
