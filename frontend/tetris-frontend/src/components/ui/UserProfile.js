@@ -1,3 +1,5 @@
+// src//components/ui/UserProfile.js
+
 import React, { useState } from "react";
 import { User, Edit2, Save, X } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
@@ -73,11 +75,17 @@ const UserProfile = () => {
       color: "text-yellow-400",
     },
     {
-      label: "Highest Level",
+      label: "Achivements Completed",
       value: user?.highest_level || 0,
       color: "text-purple-400",
     },
   ];
+
+  // Player progression fields coming directly from API
+  const playerLevel = user?.player_level || 1;
+  const playerXp = user?.exp || 0;
+  const xpNeeded = user?.exp_needed_for_next_level || 1000;
+  const progressPercent = user?.progress_percent || 0;
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -93,6 +101,10 @@ const UserProfile = () => {
               </h2>
               <p className="text-gray-400">
                 Member since {formatDate(user?.created_at)}
+              </p>
+              {/*  Player Level Display */}
+              <p className="text-pink-400 font-semibold">
+                Player Level : {playerLevel}
               </p>
             </div>
           </div>
@@ -186,6 +198,20 @@ const UserProfile = () => {
             </button>
           </div>
         )}
+
+        {/* Player Progression  */}
+        <div className="mb-8">
+          <h3 className="test-xl font-bold text-white mb-2">Progression</h3>
+          <div className="text-gray-300 mb-2">
+            XP : {playerXp} / {xpNeeded}
+          </div>
+          <div className="w-full bg-gray-700 rounded-full h-4 overflow-hidden">
+            <div
+              className="bg-pink-500 h-4 transition-all"
+              style={{ width: `${progressPercent}%` }}
+            ></div>
+          </div>
+        </div>
 
         {/* Statistics */}
         <div>

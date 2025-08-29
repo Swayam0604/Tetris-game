@@ -1,3 +1,5 @@
+#  game/views.py
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -7,7 +9,7 @@ from django.db.models.functions import Rank
 from .models import Score, GameSession, Achievement, UserStats,UserAchievement
 from .serializers import (
     ScoreSerializer, GameSessionSerializer, AchievementSerializer,UserAchievementSerializer,
-    LeaderboardSerializer, UserStatsSerializer
+    LeaderboardSerializer, UserStatsSerializer,UserProfileSerializer
 )
 
 
@@ -200,14 +202,36 @@ class UserStatsView(APIView):
         serializer = UserStatsSerializer(user_stats)
         return Response(serializer.data)
 
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def submit_score(request):
-    serializer = GameSessionSerializer(data=request.data, context={'request':request})
+    serializer = GameSessionSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
-        serializer.save()
-        #  YOU CAN ADD CHECK_ACHIEVEMENTS HERE IF NEEDED 
-        return Response(serializer.data,status=201)
+        session = serializer.save()
+
+        user = request.user
+        score_value = session.score
+
+        # UPDATE GLOBAL STATS ON USER 
+        user.total_score += score_value
+        user.games_played += 1
+        if score_value > user.highest_score:
+            user.highest_score = score_value
+
+        # ADD EXP (scaled: 1000 score = 10 EXP)
+        exp_gained = score_value // 100   # integer division
+        user.exp += exp_gained
+
+        # LEVEL SYSTEM (Level 1 needs 1000 EXP, L2 needs 2000, etc.)
+        while user.exp >= user.player_level * 1000:
+            user.exp -= user.player_level * 1000
+            user.player_level += 1
+        
+        user.save()
+
+        # CHECK ACHIEVEMENTS
+        check_achievements(user, session)
+
+        return Response(serializer.data, status=201)
     else:
-        return Response(serializer.errors,status=400)
+        return Response(serializer.errors, status=400)

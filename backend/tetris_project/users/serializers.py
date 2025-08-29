@@ -1,4 +1,4 @@
-# serializers.py
+# users/serializers.py
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from .models import CustomUser
@@ -58,8 +58,36 @@ class UserLoginSerializer(serializers.Serializer):
         return attrs
 
     
+from rest_framework import serializers
+from .models import CustomUser
+
 class UserProfileSerializer(serializers.ModelSerializer):
+    exp_needed_for_next_level = serializers.SerializerMethodField()
+    progress_percent = serializers.SerializerMethodField()
+
     class Meta:
         model = CustomUser
-        fields = ['id','username','email','total_score','games_played','highest_score','player_level','player_name','created_at']
-        read_only_fields = ['id','created_at']
+        fields = [
+            'id',
+            'username',
+            'email',
+            'total_score',
+            'games_played',
+            'highest_score',
+            'player_level',
+            'player_name',
+            'exp',
+            'exp_needed_for_next_level',   # 👈 new
+            'progress_percent',            # 👈 new
+            'created_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'exp']
+
+    def get_exp_needed_for_next_level(self, obj):
+        return obj.player_level * 1000  # e.g. Level 2 needs 2000 EXP
+
+    def get_progress_percent(self, obj):
+        needed = obj.player_level * 1000
+        if needed == 0:
+            return 0
+        return round((obj.exp / needed) * 100, 2)  # percentage to next level

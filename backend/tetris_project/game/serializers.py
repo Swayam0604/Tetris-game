@@ -3,6 +3,9 @@ from .models import (
     Score, GameSession, Achievement, UserAchievement, UserStats
 )
 from users.serializers import UserProfileSerializer
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 # Legacy Score Serializer (for backward compatibility)
 class ScoreSerializer(serializers.ModelSerializer):
@@ -73,15 +76,27 @@ class UserAchievementSerializer(serializers.ModelSerializer):
 
 # Aggregate user statistics serializer
 class UserStatsSerializer(serializers.ModelSerializer):
+    exp_needed_for_next_level = serializers.SerializerMethodField()
+    progress_percent = serializers.SerializerMethodField()
+
     class Meta:
-        model = UserStats
+        model = User
         fields = [
-            'user', 'total_games', 'games_won', 'highest_score', 'highest_level',
-            'most_lines_cleared', 'longest_game_seconds', 'total_score', 'total_lines_cleared',
-            'total_pieces_placed', 'total_playtime_seconds', 'average_score',
-            'average_lines_per_game', 'first_game_at', 'last_game_at', 'updated_at'
+            "total_score",
+            "games_played",
+            "highest_score",
+            "player_level",
+            "exp",
+            "exp_needed_for_next_level",
+            "progress_percent",
         ]
-        read_only_fields = fields
+
+    def get_exp_needed_for_next_level(self, obj):
+        return obj.player_level * 1000
+
+    def get_progress_percent(self, obj):
+        needed = obj.player_level * 1000
+        return round((obj.exp / needed) * 100, 2)
 
 # GameSession-based leaderboard serializer
 class LeaderboardSerializer(serializers.ModelSerializer):

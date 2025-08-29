@@ -1,7 +1,7 @@
 import React from "react";
 import { formatTime, formatNumber } from "../../utils/helpers";
 
-const GameStats = ({ score, level, lines, time }) => {
+const GameStats = ({ score, lines, time }) => {
   return (
     <div className="bg-gray-800 p-4 rounded-lg space-y-4">
       <h3 className="text-cyan-400 font-semibold text-lg">Game Stats</h3>
@@ -10,11 +10,6 @@ const GameStats = ({ score, level, lines, time }) => {
         <div className="text-cyan-400">
           <div className="text-sm opacity-80">Score</div>
           <div className="text-2xl font-bold">{formatNumber(score)}</div>
-        </div>
-
-        <div className="text-green-400">
-          <div className="text-sm opacity-80">Level</div>
-          <div className="text-xl font-bold">{level}</div>
         </div>
 
         <div className="text-yellow-400">

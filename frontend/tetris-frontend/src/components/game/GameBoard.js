@@ -42,13 +42,13 @@ const GameBoard = () => {
   useEffect(() => {
     if (gameState !== GAME_STATES.PLAYING) return;
 
-    const dropInterval = calculateDropTime(level, score);
+    const dropInterval = calculateDropTime(lines);
     const timer = setInterval(() => {
       dropPiece();
     }, dropInterval);
 
     return () => clearInterval(timer);
-  }, [level, score, gameState, dropPiece]);
+  }, [lines, gameState, dropPiece]);
 
   const renderBoard = () => {
     let displayBoard = [...board.map((row) => [...row])];

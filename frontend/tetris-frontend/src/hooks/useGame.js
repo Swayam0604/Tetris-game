@@ -8,7 +8,6 @@ import {
   clearLines,
   calculateGhostPiece,
   calculateScore,
-  calculateLevel,
   calculateDropTime,
 } from "../services/gameLogic";
 import { GAME_STATES } from "../utils/constants";
@@ -21,7 +20,6 @@ export const useGame = () => {
   const [nextPiece, setNextPiece] = useState(null);
   const [ghostPiece, setGhostPiece] = useState(null);
   const [score, setScore] = useState(0);
-  const [level, setLevel] = useState(1);
   const [lines, setLines] = useState(0);
   const [gameTime, setGameTime] = useState(0);
   const [dropTime, setDropTime] = useState(1000);
@@ -39,7 +37,6 @@ export const useGame = () => {
     setNextPiece(secondPiece);
     setGhostPiece(calculateGhostPiece(firstPiece, newBoard));
     setScore(0);
-    setLevel(1);
     setLines(0);
     setGameTime(0);
     setDropTime(1000);
@@ -58,14 +55,13 @@ export const useGame = () => {
   const endGame = useCallback(async () => {
     setGameState(GAME_STATES.GAME_OVER);
 
-    // Submit score to backend
     try {
       const finalTime = Math.floor((Date.now() - gameStartTime.current) / 1000);
-      await api.submitScore(score, level, lines, finalTime);
+      await api.submitScore(score, lines, finalTime);
     } catch (error) {
       console.error("Failed to submit score:", error);
     }
-  }, [score, level, lines]);
+  }, [score, lines]);
 
   const movePiece = useCallback(
     (dx, dy) => {
@@ -109,18 +105,20 @@ export const useGame = () => {
       const newBoard = placePiece(board, currentPiece);
       const { board: clearedBoard, linesCleared } = clearLines(newBoard);
 
+      // count blocks placed
+      const blocksPlaced = currentPiece.shape.flat().filter(Boolean).length;
+
+      // new stats
       const newLines = lines + linesCleared;
-      const newLevel = calculateLevel(newLines);
-      const lineScore = calculateScore(linesCleared, level);
-      const newScore = score + lineScore;
+      const gainedScore = calculateScore(linesCleared, blocksPlaced);
+      const newScore = score + gainedScore;
 
       setBoard(clearedBoard);
       setCurrentPiece(nextPiece);
       setNextPiece(getRandomTetromino());
       setLines(newLines);
-      setLevel(newLevel);
       setScore(newScore);
-      setDropTime(calculateDropTime(newLevel));
+      setDropTime(calculateDropTime(newLines));
 
       if (nextPiece) {
         setGhostPiece(calculateGhostPiece(nextPiece, clearedBoard));
@@ -132,7 +130,6 @@ export const useGame = () => {
     board,
     nextPiece,
     lines,
-    level,
     score,
     movePiece,
     endGame,
@@ -149,7 +146,6 @@ export const useGame = () => {
     const droppedPiece = { ...currentPiece, y: newY };
     setCurrentPiece(droppedPiece);
 
-    // Immediately trigger drop logic
     setTimeout(dropPiece, 0);
   }, [gameState, currentPiece, board, dropPiece]);
 
@@ -174,7 +170,6 @@ export const useGame = () => {
     nextPiece,
     ghostPiece,
     score,
-    level,
     lines,
     gameTime,
     startGame,

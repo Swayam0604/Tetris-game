@@ -1,4 +1,6 @@
-import React, { useEffect, useRef } from "react";
+//   src/components/game/GameOverScreen.js
+
+import React, { useEffect, useRef ,useState} from "react";
 import { Play, Home } from "lucide-react";
 import { formatTime, formatNumber } from "../../utils/helpers";
 import { api } from "../../services/api";
@@ -14,15 +16,31 @@ const GameOverScreen = ({
   // Prevent double submissions
   const submittedRef = useRef(false);
 
+  // Local stated for EXP and player Level 
+  const [expGained, setExpGained] = useState(0);
+  const [playerLevel, setPlayerLevel] = useState(1);
+
+
   useEffect(() => {
     if (submittedRef.current) return; // Skip if already submitted
     submittedRef.current = true;
+
+    // Example EXP Calculation: 1 exp for every 50 score 
+    const exp = Math.floor(score / 50);
+    setExpGained(exp);
+
+    //  Example leveling system : every 1000 EXP  = +1 player level 
+    //  (you.d normally fetch current EXP/ level from backend and update there)
+    const newLevel = 1 + Math.floor(score / 1000);
+    setPlayerLevel(newLevel);
 
     const scoreData = {
       score: score,
       final_level: level, // use correct backend field names!
       lines_cleared: lines,
       duration_seconds: gameTime, // use correct backend field!
+      exp_gained: exp,
+      player_level: newLevel, //
     };
 
     api
@@ -60,6 +78,16 @@ const GameOverScreen = ({
             <span className="text-purple-400 font-bold">
               {formatTime(gameTime)}
             </span>
+          </div>
+
+          {/* NEW EXP & PLAYER LEVEL  */}
+          <div className="text-lg">
+            Exp Gained: {" "}
+            <span className="text-blue-400 font-bold">{expGained}</span>
+          </div>
+          <div className="text-lg">
+            Player Level: {" "}
+            <span className="text-pink-400 font-bold">{playerLevel}</span>
           </div>
         </div>
 
